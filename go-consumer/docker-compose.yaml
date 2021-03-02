@@ -1,0 +1,34 @@
+version: "3"
+
+services:
+  app:
+    build: .
+    volumes:
+    - .:/go/src/
+    extra_hosts:
+      - "host.docker.internal:172.17.0.1"
+    environment:
+      mongoDbApplyURI: mongodb://root:example@mongo:27017/?authSource=admin
+      kafkaBootstrapServers: host.docker.internal:9094
+      kafkaConsumerGroupId: hl7-group
+      kafkaHL7Topic: hl7-messages
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    expose:
+      - 27017
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
